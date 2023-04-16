@@ -1,7 +1,8 @@
+const dotenv = require("dotenv");
+dotenv.config();
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const multer = require("multer");
@@ -11,10 +12,11 @@ const postRoute = require("./routes/posts");
 const router = express.Router();
 const path = require("path");
 
-dotenv.config();
+
+console.log(process.env.MONGOURL);
 
 mongoose.connect(
-  "mongodb://localhost:27017/ArtSocilasDB",
+  process.env.MONGOURL,
   () => {
     console.log("Connected to MongoDB");
   }
