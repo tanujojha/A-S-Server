@@ -3,9 +3,10 @@ dotenv.config();
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const helmet = require("helmet");
-const morgan = require("morgan");
+// const helmet = require("helmet");
+// const morgan = require("morgan");
 const multer = require("multer");
+const cors = require("cors")
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
@@ -13,10 +14,15 @@ const router = express.Router();
 const path = require("path");
 
 
-console.log(process.env.MONGOURL);
+// console.log(process.env.MONGOURL);
+
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true)
 
 mongoose.connect(
-  process.env.MONGOURL,
+  process.env.MONGOURL, {useNewUrlParser: true},
   () => {
     console.log("Connected to MongoDB");
   }
@@ -27,8 +33,9 @@ app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 //middleware
 app.use(express.json());
-app.use(helmet());
-app.use(morgan("common"));
+app.use(cors())
+// app.use(helmet());
+// app.use(morgan("common"));
 
 const port = 8800;
 
@@ -55,5 +62,5 @@ app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
 
 app.listen(port, () => {
-  console.log(`Backend server is running! ${port}`);
+  console.log(`Backend server is running on ${port}`);
 });
