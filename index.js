@@ -13,7 +13,7 @@ const postRoute = require("./routes/posts");
 const router = express.Router();
 const path = require("path");
 
-
+app.use(cors())
 // console.log(process.env.MONGOURL);
 
 mongoose.set('useNewUrlParser', true);
@@ -33,7 +33,7 @@ app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 //middleware
 app.use(express.json());
-app.use(cors())
+
 // app.use(helmet());
 // app.use(morgan("common"));
 
