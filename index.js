@@ -31,7 +31,7 @@ mongoose.connect(
 app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 const corsOptions = {
-  origin: "*",
+  origin: "https://artsocials.netlify.app",
 }
 
 //middleware
