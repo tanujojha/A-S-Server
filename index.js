@@ -61,6 +61,10 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
   }
 });
 
+app.get("/", (req, res)=>{
+  res.send("hello from server")
+})
+
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
