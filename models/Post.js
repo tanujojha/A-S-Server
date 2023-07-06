@@ -17,9 +17,18 @@ const PostSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    comments: {
-      type: String,
-    }
+    comments: [
+      {
+        userID: {
+          type: String,
+          required: true,
+        },
+        comment: {
+          type: String,
+          required: true
+        }
+      }
+    ]
   },
   { timestamps: true }
 );

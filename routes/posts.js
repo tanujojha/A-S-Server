@@ -2,9 +2,9 @@ const router = require("express").Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
 
-//create a post
-
+// create a post
 router.post("/", async (req, res) => {
+  // console.log(req.body);
   const newPost = new Post(req.body);
   try {
     const savedPost = await newPost.save();
@@ -13,8 +13,9 @@ router.post("/", async (req, res) => {
     res.status(500).json(err);
   }
 });
-//update a post
 
+
+// update a post
 router.put("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -28,8 +29,9 @@ router.put("/:id", async (req, res) => {
     res.status(500).json(err);
   }
 });
-//delete a post
 
+
+// delete a post
 router.delete("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -43,8 +45,9 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json(err);
   }
 });
-//like / unlike a post
 
+
+// like/unlike a post
 router.put("/:id/like", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -59,8 +62,60 @@ router.put("/:id/like", async (req, res) => {
     res.status(500).json(err);
   }
 });
-//get a post
 
+
+// comment on a post
+router.put("/:id/addcomment", async (req, res)=>{
+  try {
+    // console.log(req.body);
+    const postID = req.params.id;
+    const {userId, comment} = req.body;
+
+    const post = await Post.findById(postID);
+    post.comments.push({ userID: userId, comment: comment });
+    const updatedPost = await post.save();
+
+    // this is another way of doing it
+    // const updatedPost = await Post.findOneAndUpdate(
+    //   { _id: postID },
+    //   { $push: { comments: { userID: userId, comment: comment } } },
+    //   { new: true }
+    // );
+
+    // console.log(updatedPost);
+
+    if(!post){
+      res.status(403).json({message: "can not comment"})
+    }
+
+    res.status(200).send({messge: "added comment", post: updatedPost})
+    
+  } catch (err) {
+    res.status(500).json({error: err, message: "server error can not post comment"})
+  }
+});
+
+
+// Get All Comments
+router.get("/:id/getcomments", async(req, res)=>{
+  try {
+
+    const postID = req.params.id;
+    const postComments = await Post.findById(postID, "comments");
+    console.log(postComments);
+    if(postComments.comments.length === 0){
+      console.log("not comments");
+    }else{
+      console.log("yess comments");
+    }
+    
+  } catch (err) {
+    res.status(500).send("server error cant not fetch comments")
+  }
+})
+
+
+// get a post
 router.get("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -70,8 +125,8 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-//get timeline posts
 
+// get timeline posts
 router.get("/timeline/:userId", async (req, res) => {
   try {
     const currentUser = await User.findById(req.params.userId);
@@ -87,8 +142,8 @@ router.get("/timeline/:userId", async (req, res) => {
   }
 });
 
-//get user's all posts
 
+// get user's all posts
 router.get("/profile/:username", async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
@@ -98,5 +153,9 @@ router.get("/profile/:username", async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+
+
+
 
 module.exports = router;
