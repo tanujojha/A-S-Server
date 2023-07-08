@@ -64,31 +64,32 @@ router.put("/:id/like", async (req, res) => {
 });
 
 
-// comment on a post
+// add a comment
 router.put("/:id/addcomment", async (req, res)=>{
   try {
     // console.log(req.body);
     const postID = req.params.id;
     const {userId, comment} = req.body;
 
-    const post = await Post.findById(postID);
-    post.comments.push({ userID: userId, comment: comment });
-    const updatedPost = await post.save();
-
     // this is another way of doing it
-    // const updatedPost = await Post.findOneAndUpdate(
-    //   { _id: postID },
-    //   { $push: { comments: { userID: userId, comment: comment } } },
-    //   { new: true }
-    // );
+    // const post = await Post.findById(postID);
+    // post.comments.push({ userID: userId, comment: comment });
+    // const updatedPost = await post.save();
 
-    // console.log(updatedPost);
+    const updatedPost = await Post.findOneAndUpdate(
+      { _id: postID },
+      { $push: { comments: { userID: userId, comment: comment } } },
+      { new: true })
+      .populate("comments.userID", "username")
+      .sort({"comments.date": -1});
 
-    if(!post){
+    if(!updatedPost){
       res.status(403).json({message: "can not comment"})
     }
 
-    res.status(200).send({messge: "added comment", post: updatedPost})
+    updatedPost.comments.reverse(); // this is untill sort is not working
+
+    res.status(200).send({messge: "added comment", comments: updatedPost.comments})
     
   } catch (err) {
     res.status(500).json({error: err, message: "server error can not post comment"})
@@ -96,21 +97,22 @@ router.put("/:id/addcomment", async (req, res)=>{
 });
 
 
-// Get All Comments
-router.get("/:id/getcomments", async(req, res)=>{
+// get all comments
+router.get("/:id/getallcomments", async(req, res)=>{
+  const postID = req.params.id;
   try {
+    const postWithComments = await Post.findById(postID, "comments")
+    .populate("comments.userID", "username profilePicture")
+    .sort({ "comments.date": -1 })
 
-    const postID = req.params.id;
-    const postComments = await Post.findById(postID, "comments");
-    console.log(postComments);
-    if(postComments.comments.length === 0){
-      console.log("not comments");
-    }else{
-      console.log("yess comments");
+    // console.log(postWithComments.comments);
+    postWithComments.comments.reverse();  // this is untill sort is not working
+
+    if(postWithComments){
+      res.status(200).json({messge: "success", comments: postWithComments.comments})
     }
-    
-  } catch (err) {
-    res.status(500).send("server error cant not fetch comments")
+  } catch (error) {
+    res.status(500).json({error: error, message: "server error can not get comments"})
   }
 })
 
