@@ -35,7 +35,7 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    if (post.userId === req.body.userId) {
+    if (post.userId == req.body.userId) {
       await post.deleteOne();
       res.status(200).json("the post has been deleted");
     } else {
@@ -104,6 +104,7 @@ router.get("/:id/getallcomments", async(req, res)=>{
     const postWithComments = await Post.findById(postID, "comments")
     .populate("comments.userID", "username profilePicture")
     .sort({ "comments.date": -1 })
+    // .populate({ path: "comments.userID", select: "username profilePicture", options: { sort: { "date": -1 }} });
 
     // console.log(postWithComments.comments);
     postWithComments.comments.reverse();  // this is untill sort is not working
@@ -134,10 +135,11 @@ router.get("/timeline/:userId", async (req, res) => {
     const currentUser = await User.findById(req.params.userId);
     const userPosts = await Post.find({ userId: currentUser._id });
     const friendPosts = await Promise.all(
-      currentUser.followings.map((friendId) => {
-        return Post.find({ userId: friendId });
+      currentUser.followings.map(async(friendId) => {
+        return await Post.find({ userId: friendId });
       })
     );
+    // console.log(friendPosts);
     res.status(200).json(userPosts.concat(...friendPosts));
   } catch (err) {
     res.status(500).json(err);
@@ -150,6 +152,7 @@ router.get("/profile/:username", async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
     const posts = await Post.find({ userId: user._id });
+    // console.log(posts);
     res.status(200).json(posts);
   } catch (err) {
     res.status(500).json(err);
@@ -157,7 +160,7 @@ router.get("/profile/:username", async (req, res) => {
 });
 
 
-
+// .populate({ path: "comments.userID", select: "username profilePicture", options: { sort: { "date": -1 }} });
 
 
 module.exports = router;

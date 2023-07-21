@@ -47,9 +47,10 @@ router.get("/", async (req, res) => {
   try {
     const user = userId
       ? await User.findById(userId)
-      : await User.findOne({ username: username });
-    const { password, updatedAt, ...other } = user._doc;
-    res.status(200).json(other);
+      : await User.findOne({ username: username }, "-password -createdAt");
+    // const { password, updatedAt, ...other } = user._doc;  // for more info on _doc see https://stackoverflow.com/questions/18821212/mongoose-whats-up-with-doc
+
+    res.status(200).json(user);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -119,9 +120,5 @@ router.put("/:id/unfollow", async (req, res) => {
   }
 });
 
-
-//seacrh a user
-
-router.post("/search/")
 
 module.exports = router;
